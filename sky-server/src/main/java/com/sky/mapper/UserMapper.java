@@ -1,6 +1,7 @@
 package com.sky.mapper;
 
 import com.sky.entity.User;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
@@ -20,4 +21,14 @@ public interface UserMapper {
      * @param user
      */
     void insert(User user);
+
+
+    @Delete("delete from user where id = #{id}")
+    void deleteById(Long id);
+
+    @Delete("delete from user")
+    void deleteAll();
+
+    @Select("select * from user where id = #{id}")
+    User getById(Long id);
 }
