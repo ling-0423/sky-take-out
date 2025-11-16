@@ -110,4 +110,6 @@ public interface OrderService {
      * @param id
      */
     void reminder(Long id);
+
+//    void payOrder(Long orderId);
 }

@@ -42,7 +42,7 @@ public class Orders implements Serializable {
     //订单号
     private String number;
 
-    //订单状态 1待付款 2待接单 3已接单 4派送中 5已完成 6已取消 7退款
+    // 订单状态：1-待付款，2-已支付/待制作，3-制作中，4-待取餐，5-已完成，6-已取消，7-退款
     private Integer status;
 
     //下单用户id

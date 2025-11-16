@@ -116,4 +116,11 @@ public class OrderController {
         orderService.reminder(id);
         return Result.success();
     }
+
+//    @PostMapping("/pay")
+//    @ApiOperation("模拟支付")
+//    public Result<String> mockPay(@RequestParam Long orderId) {
+//        orderService.payOrder(orderId);
+//        return Result.success("支付成功（模拟）");
+//    }
 }
