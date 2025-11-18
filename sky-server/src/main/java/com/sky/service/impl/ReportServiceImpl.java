@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -194,7 +195,7 @@ public class ReportServiceImpl implements ReportService {
         LocalDateTime beginTime = LocalDateTime.of(begin, LocalTime.MIN);
         LocalDateTime endTime = LocalDateTime.of(end, LocalTime.MAX);
 
-        List<GoodsSalesDTO> goodsSalesDTOList = orderMapper.getSalesTop10(beginTime, endTime);
+        List<GoodsSalesDTO> goodsSalesDTOList=orderMapper.getSalesTop10(beginTime,endTime);
 
         String nameList=StringUtils.join(goodsSalesDTOList.stream().map(GoodsSalesDTO::getName).collect(Collectors.toList()),",");
         String numberList=StringUtils.join(goodsSalesDTOList.stream().map(GoodsSalesDTO::getNumber).collect(Collectors.toList()),",");
@@ -205,25 +206,86 @@ public class ReportServiceImpl implements ReportService {
                 .build();
     }
 
+//    /**
+//     * 导出近30天的运营数据报表
+//     *
+//     * @param response
+//     */
+//    public void exportBusinessData(HttpServletResponse response) {
+//        LocalDate begin = LocalDate.now().minusDays(30);
+//        LocalDate end = LocalDate.now().minusDays(1);
+//
+//        BusinessDataVO businessData = workspaceService.getBusinessData(LocalDateTime.of(begin, LocalTime.MIN), LocalDateTime.of(end, LocalTime.MAX));
+//
+//        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("template/运营数据报表模板.xlsx");
+//
+//        try {
+//            XSSFWorkbook excel = new XSSFWorkbook(inputStream);
+//
+//            XSSFSheet sheet = excel.getSheet("Sheet1");
+//            sheet.getRow(1).getCell(1).setCellValue(begin + "至" + end);
+//
+//            XSSFRow row = sheet.getRow(3);
+//            row.getCell(2).setCellValue(businessData.getTurnover());
+//            row.getCell(4).setCellValue(businessData.getOrderCompletionRate());
+//            row.getCell(6).setCellValue(businessData.getNewUsers());
+//
+//            row = sheet.getRow(4);
+//            row.getCell(2).setCellValue(businessData.getValidOrderCount());
+//            row.getCell(4).setCellValue(businessData.getUnitPrice());
+//
+//            for (int i = 0; i < 30; i++) {
+//                LocalDate date = begin.plusDays(i);
+//
+//                businessData = workspaceService.getBusinessData(LocalDateTime.of(date, LocalTime.MIN), LocalDateTime.of(date, LocalTime.MAX));
+//
+//                row = sheet.getRow(i + 7);
+//                row.getCell(1).setCellValue(date.toString());
+//                row.getCell(2).setCellValue(businessData.getTurnover());
+//                row.getCell(3).setCellValue(businessData.getValidOrderCount());
+//                row.getCell(4).setCellValue(businessData.getOrderCompletionRate());
+//                row.getCell(5).setCellValue(businessData.getUnitPrice());
+//                row.getCell(6).setCellValue(businessData.getNewUsers());
+//            }
+//            //通过输出流将文件下载到客户端浏览器中
+//            ServletOutputStream out = response.getOutputStream();
+//            excel.write(out);
+//
+//            out.flush();
+//            out.close();
+//            inputStream.close();
+//            excel.close();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
+
     /**
-     * 导出近30天的运营数据报表
+     * 导出指定时间区间内的运营数据报表
      *
      * @param response
+     * @param begin  开始日期（LocalDate）
+     * @param end    结束日期（LocalDate）
      */
-    public void exportBusinessData(HttpServletResponse response) {
-        LocalDate begin = LocalDate.now().minusDays(30);
-        LocalDate end = LocalDate.now().minusDays(1);
+    public void exportBusinessData(HttpServletResponse response, LocalDate begin, LocalDate end) {
 
-        BusinessDataVO businessData = workspaceService.getBusinessData(LocalDateTime.of(begin, LocalTime.MIN), LocalDateTime.of(end, LocalTime.MAX));
+        // ① 查询整个区间的汇总运营数据
+        BusinessDataVO businessData = workspaceService.getBusinessData(
+                LocalDateTime.of(begin, LocalTime.MIN),
+                LocalDateTime.of(end, LocalTime.MAX)
+        );
 
-        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("template/运营数据报表模板.xlsx");
+        InputStream inputStream = this.getClass().getClassLoader()
+                .getResourceAsStream("template/运营数据报表模板.xlsx");
 
         try {
             XSSFWorkbook excel = new XSSFWorkbook(inputStream);
-
             XSSFSheet sheet = excel.getSheet("Sheet1");
-            sheet.getRow(1).getCell(1).setCellValue(begin + "至" + end);
 
+            // ② 设置标题：时间范围
+            sheet.getRow(1).getCell(1).setCellValue(begin + " 至 " + end);
+
+            // ③ 写入汇总数据
             XSSFRow row = sheet.getRow(3);
             row.getCell(2).setCellValue(businessData.getTurnover());
             row.getCell(4).setCellValue(businessData.getOrderCompletionRate());
@@ -233,20 +295,26 @@ public class ReportServiceImpl implements ReportService {
             row.getCell(2).setCellValue(businessData.getValidOrderCount());
             row.getCell(4).setCellValue(businessData.getUnitPrice());
 
-            for (int i = 0; i < 30; i++) {
+            // ④ 写入每日数据：不再写死 30 天！
+            long days = begin.until(end, ChronoUnit.DAYS); // 区间天数
+
+            for (int i = 0; i <= days; i++) {
                 LocalDate date = begin.plusDays(i);
 
-                businessData = workspaceService.getBusinessData(LocalDateTime.of(date, LocalTime.MIN), LocalDateTime.of(date, LocalTime.MAX));
+                BusinessDataVO daily = workspaceService.getBusinessData(
+                        LocalDateTime.of(date, LocalTime.MIN),
+                        LocalDateTime.of(date, LocalTime.MAX)
+                );
 
-                row = sheet.getRow(i + 7);
+                row = sheet.getRow(i + 7);  // 第 8 行开始写
                 row.getCell(1).setCellValue(date.toString());
-                row.getCell(2).setCellValue(businessData.getTurnover());
-                row.getCell(3).setCellValue(businessData.getValidOrderCount());
-                row.getCell(4).setCellValue(businessData.getOrderCompletionRate());
-                row.getCell(5).setCellValue(businessData.getUnitPrice());
-                row.getCell(6).setCellValue(businessData.getNewUsers());
+                row.getCell(2).setCellValue(daily.getTurnover());
+                row.getCell(3).setCellValue(daily.getValidOrderCount());
+                row.getCell(4).setCellValue(daily.getOrderCompletionRate());
+                row.getCell(5).setCellValue(daily.getUnitPrice());
+                row.getCell(6).setCellValue(daily.getNewUsers());
             }
-            //通过输出流将文件下载到客户端浏览器中
+
             ServletOutputStream out = response.getOutputStream();
             excel.write(out);
 
@@ -254,6 +322,7 @@ public class ReportServiceImpl implements ReportService {
             out.close();
             inputStream.close();
             excel.close();
+
         } catch (IOException e) {
             e.printStackTrace();
         }

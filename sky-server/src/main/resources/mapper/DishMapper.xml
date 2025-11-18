@@ -24,7 +24,7 @@
                 and d.status = #{status}
             </if>
         </where>
-        order by d.category_id desc
+        order by d.id asc
     </select>
 
     <update id="update">
