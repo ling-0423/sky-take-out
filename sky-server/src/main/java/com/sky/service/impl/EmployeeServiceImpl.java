@@ -9,9 +9,11 @@ import com.sky.context.BaseContext;
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
 import com.sky.dto.EmployeePageQueryDTO;
+import com.sky.dto.PasswordEditDTO;
 import com.sky.entity.Employee;
 import com.sky.exception.AccountLockedException;
 import com.sky.exception.AccountNotFoundException;
+import com.sky.exception.PasswordEditFailedException;
 import com.sky.exception.PasswordErrorException;
 import com.sky.mapper.EmployeeMapper;
 import com.sky.result.PageResult;
@@ -150,5 +152,32 @@ public class EmployeeServiceImpl implements EmployeeService {
 //        employee.setUpdateUser(BaseContext.getCurrentId());
 
         employeeMapper.update(employee);
+    }
+
+
+    @Override
+    public void updatePassword(PasswordEditDTO passwordEditDTO) {
+
+        Long empId = BaseContext.getCurrentId();
+        Employee employee = employeeMapper.getById(empId);
+
+        // ===== 校验原密码（需要 MD5 加密后比较）=====
+        String oldPwdMd5 = DigestUtils.md5DigestAsHex(passwordEditDTO.getOldPassword().getBytes());
+
+        if (!employee.getPassword().equals(oldPwdMd5)) {
+            throw new PasswordEditFailedException("原密码不正确");
+        }
+
+        // ===== 新密码加密后保存 =====
+        String newPwdMd5 = DigestUtils.md5DigestAsHex(passwordEditDTO.getNewPassword().getBytes());
+
+        Employee emp = Employee.builder()
+                .id(empId)
+                .password(newPwdMd5)
+                .updateTime(LocalDateTime.now())
+                .updateUser(empId)
+                .build();
+
+        employeeMapper.updateEmp(emp);
     }
 }
