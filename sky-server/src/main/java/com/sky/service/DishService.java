@@ -62,4 +62,6 @@ public interface DishService {
      * @param id
      */
     void startOrStop(Integer status, Long id);
+
+    List<Dish> getByCategoryId(Long categoryId);
 }

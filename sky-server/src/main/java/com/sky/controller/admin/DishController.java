@@ -134,4 +134,17 @@ public class DishController {
         Set keys = redisTemplate.keys(pattern);
         redisTemplate.delete(keys);
     }
+
+    /**
+     * 根据分类id查询菜品
+     * @param categoryId
+     * @return
+     */
+    @GetMapping("/list")
+    @ApiOperation("通过分类id查询菜品")
+    public Result getByCategoryId(Long categoryId){
+        log.info("查询分类id：{}",categoryId);
+        List<Dish> dishes = dishService.getByCategoryId(categoryId);
+        return Result.success(dishes);
+    }
 }
