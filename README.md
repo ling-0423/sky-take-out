@@ -31,3 +31,8 @@
 所有统计均基于后端动态计算，并提供时间区间查询能力，支持前端图表展示。
 
 <img width="1919" height="906" alt="image" src="https://github.com/user-attachments/assets/b86d7d00-8b88-48b3-afab-0d9e53372b9b" />
+<img width="1920" height="903" alt="image" src="https://github.com/user-attachments/assets/ea85cf83-337d-4ae3-b1fe-fa2cca7fa52b" />
+<img width="1920" height="903" alt="image" src="https://github.com/user-attachments/assets/7e1f7a11-221f-4f0e-99de-05ce721cb78c" />
+<img width="1920" height="903" alt="image" src="https://github.com/user-attachments/assets/e075e68d-faed-4563-9cdc-4fe548123b53" />
+<img width="1920" height="903" alt="image" src="https://github.com/user-attachments/assets/a93141b6-2362-41e2-a491-2171c2b07262" />
+<img width="1920" height="903" alt="image" src="https://github.com/user-attachments/assets/dcd8ff33-5c48-4846-a3b2-268c13de0442" />
